@@ -2,6 +2,8 @@ package main;
 
 import dao.departmentAdminAccountDAO;
 import dto.departmentAdminAccountDTO;
+import dto.integratedAdminAccountDTO;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -9,10 +11,11 @@ public class departmentAccount {
 	private departmentAdminAccountDAO dadao = new departmentAdminAccountDAO();
 	private Scanner Scan = new Scanner(System.in);
 
-	departmentAccount() {
+	public departmentAccount() {
 		boolean flag = true;
 		while (flag) {
-			System.out.println("[1] 계정 등록 [2] 계정 삭제 [3] 계정 조회 [4] 계정 전체보기 [5] 비밀번호 수정 [6] 종료");
+			System.out.println("-----부서 관리자-----");
+			System.out.println("[1] 계정 등록 [2] 계정 삭제 [3] 계정 조회 [4] 계정 전체보기 [5] 비밀번호 수정 [6] 중복 확인 [7] 종료");
 			int choice = Scan.nextInt();
 			Scan.nextLine();
 			switch (choice) {
@@ -32,12 +35,34 @@ public class departmentAccount {
 				modifyAccount();
 				break;
 			case 6:
+				checkId();
+				break;
+
+			case 7:
 				System.out.println("계정 관리 종료");
 				flag = false;
 				break;
 			}
 		}
 
+	}
+
+	private void checkId() {
+		System.out.println("아이디 중복 확인 기능입니다.");
+		System.out.println("중복 확인할 아이디를 입력하세요");
+		String duplicateDepartmentAdminId = Scan.nextLine();
+		departmentAdminAccountDTO dadto = new departmentAdminAccountDTO();
+		dadto.setDepartmentId(duplicateDepartmentAdminId);
+
+		// 중복 확인 메서드 호출
+		boolean isDuplicate = dadao.duplicateDepartmentAdminId(duplicateDepartmentAdminId);
+
+		// true면 중복 false면 중복 아님
+		if (isDuplicate) {
+			System.out.println("중복된 ID입니다.");
+		} else {
+			System.out.println("사용 가능한 ID입니다.");
+		}
 	}
 
 	public void searchAccount() {

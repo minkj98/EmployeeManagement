@@ -10,11 +10,11 @@ public class integratedAccount {
 
 	private Scanner Scan = new Scanner(System.in);
 
-	integratedAccount() {
+	public integratedAccount() {
 		boolean flag = true;
 		while (flag) {
 			System.out.println("-----통합 관리자-----");
-			System.out.println("[1] 계정 등록 [2] 계정 삭제 [3] 계정 전체보기 [4] 계정 조회 [5] 계정 수정 [6] 종료");
+			System.out.println("[1] 계정 등록 [2] 계정 삭제 [3] 계정 전체보기 [4] 계정 조회 [5] 계정 수정 [6] 중복 확인 [7]종료");
 			int choice = Scan.nextInt();
 			Scan.nextLine();
 			switch (choice) {
@@ -34,6 +34,9 @@ public class integratedAccount {
 				modifyAccount();
 				break;
 			case 6:
+				checkId();
+				break;
+			case 7:
 				System.out.println("계정 관리 종료");
 				flag = false;
 				break;
@@ -43,6 +46,24 @@ public class integratedAccount {
 
 	}
 
+	private void checkId() {
+		System.out.println("아이디 중복 확인 기능입니다.");
+		System.out.println("중복 확인할 아이디를 입력하세요");
+		String duplicateIntegratedAdminId = Scan.nextLine();
+		integratedAdminAccountDTO iadto = new integratedAdminAccountDTO();
+		iadto.setIntegratedId(duplicateIntegratedAdminId);
+
+		// 중복 확인 메서드 호출
+		boolean isDuplicate = iadao.duplicateintegratedAdminId(duplicateIntegratedAdminId);
+
+		// true면 중복 false면 중복 아님
+		if (isDuplicate) {
+			System.out.println("중복된 ID입니다.");
+		} else {
+			System.out.println("사용 가능한 ID입니다.");
+		}
+	}
+	
 	private void searchAccount() {
 		System.out.println("특정 계정 보기 기능입니다.");
 		System.out.println("조회를 원하는 통합 관리자의 id를 입력하세요");

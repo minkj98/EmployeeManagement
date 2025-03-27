@@ -1,8 +1,7 @@
 package dao;
 
 import dto.departmentAdminAccountDTO;
-import dto.employeeDTO;
-import dto.employeeSpecInfoDTO;
+
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -192,5 +191,36 @@ public class departmentAdminAccountDAO extends superDAO{
 			}
 		}
 		return account;
+	}
+
+	public boolean duplicateDepartmentAdminId(String duplicateDepartmentAdminId) {
+		boolean flag = false;
+		PreparedStatement psmt = null;
+		ResultSet rs = null;
+		try {
+			if (getConnection() != null) {
+				String sql = "SELECT * FROM departmentAdminAccount WHERE DepartmentId = ?";
+				psmt = conn.prepareStatement(sql);
+				psmt.setString(1, duplicateDepartmentAdminId);
+				rs = psmt.executeQuery(); // 쿼리 실행
+
+				// 결과 확인
+				if (rs.next()) { // 결과가 있으면 중복
+					flag = true;
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("중복 조회 실패: " + e.getMessage());// 예외 발생 시 스택 트레이스 출력
+		} finally {
+			// 자원 해제
+			try {
+				rs.close();
+				psmt.close();
+				conn.close(); // 연결 해제
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return flag; // 중복 여부 반환
 	}
 }

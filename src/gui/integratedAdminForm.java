@@ -1,117 +1,131 @@
 package gui;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.ArrayList;
 import dao.departmentDAO;
 import dto.departmentDTO;
-public class integratedAdminForm extends JFrame{
-    private JTextField departmentCodeField, departmentNameField;
-    private JTextArea resultArea;
-    private JButton insertButton, updateButton, deleteButton, selectAllButton;
-    private departmentDAO deptDAO;
+import javax.swing.JComboBox;
+import javax.swing.table.DefaultTableModel;
+
+public class integratedAdminForm extends JFrame {
+    private JComboBox<String> departmenCodeComboBox;
+    private JComboBox<String> departmentNameComboBox;
+    private JTextField departmentCodeField;
+    private JTextField departmentNameField;
+    private JTable resultTable; // JTextArea 대신 JTable 사용
+    private DefaultTableModel tableModel; // 테이블 데이터 모델
+    private JButton insertButton;
+    private JButton updateButton;
+    private JButton deleteButton;
+    private JButton selectAllButton;
+    private final departmentDAO deptDAO;
+    private int width = 1000;
+    private int height = 800;
+    private int x = (Toolkit.getDefaultToolkit().getScreenSize().width - width) / 2;
+    private int y = (Toolkit.getDefaultToolkit().getScreenSize().height - height) / 2;
+    private String[] deptCode = {"dev", "hr", "mkt", "fin", "sal", "sup"};
+    private String[] deptName = {"개발팀", "인사팀", "마케팅팀", "재무팀", "급여팀", "고객지원팀"};
 
     public integratedAdminForm() {
-        deptDAO = departmentDAO.getInstance(); // departmentDAO 객체 생성
+        deptDAO = departmentDAO.getInstance();
+        initComponents();
+        addListener();
+        showFrame();
+    }
 
-        // 기본 설정
+    private void addListener() {
+        insertButton.addActionListener(e -> insertDepartment());
+        deleteButton.addActionListener(e -> deleteDepartment());
+        selectAllButton.addActionListener(e -> selectAllDepartments());
+    }
+
+    private void insertDepartment() {
+        try {
+            int codeIndex = departmenCodeComboBox.getSelectedIndex();
+            int nameIndex = departmentNameComboBox.getSelectedIndex();
+
+            // 부서 코드와 일치하지 않는 부서 이름 선택시
+            if (codeIndex != nameIndex) {
+                JOptionPane.showMessageDialog(this, "잘못된 선택입니다. 부서 코드와 이름이 일치해야 합니다.", "선택 오류", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String departmentCode = deptCode[codeIndex];
+            String departmentName = deptName[nameIndex];
+
+            departmentDTO dto = new departmentDTO();
+            dto.setDepartmentCode(departmentCode);
+            dto.setDepartmentName(departmentName);
+            deptDAO.insert(dto);
+            
+            JOptionPane.showMessageDialog(this, "부서 추가 완료: " + departmentCode + " - " + departmentName);
+            selectAllDepartments(); // 추가 후 테이블 갱신
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "부서 추가 실패: " + e.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void deleteDepartment() {
+        try {
+            //departmentCode에서 선택된 항목을 가져옴
+            String departmentCode = (String) departmenCodeComboBox.getSelectedItem();
+            deptDAO.delete(departmentCode);
+            JOptionPane.showMessageDialog(this, "부서 삭제 완료: " + departmentCode);
+            selectAllDepartments(); // 삭제 후 테이블 갱신
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "부서 삭제 실패: " + e.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void selectAllDepartments() {
+        try {
+            ArrayList<departmentDTO> departments = deptDAO.selectAll();
+            tableModel.setRowCount(0); // 기존 데이터 지우기
+            for (departmentDTO dept : departments) {
+                tableModel.addRow(new String[]{
+                        dept.getDepartmentCode(),
+                        dept.getDepartmentName()
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "부서 조회 실패: " + e.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showFrame() {
         setTitle("부서 관리 시스템");
-        setSize(400, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // UI 구성
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(5, 2));
-
-        JLabel departmentCodeLabel = new JLabel("부서 코드");
-        departmentCodeField = new JTextField();
-        JLabel departmentNameLabel = new JLabel("부서 이름");
-        departmentNameField = new JTextField();
-
-        insertButton = new JButton("부서 추가");
-        updateButton = new JButton("부서 수정");
-        deleteButton = new JButton("부서 삭제");
-        selectAllButton = new JButton("모든 부서 조회");
-
-        resultArea = new JTextArea(5, 30);
-        resultArea.setEditable(false);
-
-        panel.add(departmentCodeLabel);
-        panel.add(departmentCodeField);
-        panel.add(departmentNameLabel);
-        panel.add(departmentNameField);
-        panel.add(insertButton);
-        panel.add(updateButton);
-        panel.add(deleteButton);
-        panel.add(selectAllButton);
-
-        // 버튼 이벤트 처리
-        insertButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                insertDepartment();
-            }
-        });
-
-        updateButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                updateDepartment();
-            }
-        });
-
-        deleteButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                deleteDepartment();
-            }
-        });
-
-        selectAllButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                selectAllDepartments();
-            }
-        });
-
-        // 화면에 추가
-        getContentPane().add(panel, BorderLayout.NORTH);
-        getContentPane().add(new JScrollPane(resultArea), BorderLayout.CENTER);
+        setResizable(true);
+        setBounds(x, y, width, height);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    // 부서 추가
-    private void insertDepartment() {
-        String departmentCode = departmentCodeField.getText();
-        String departmentName = departmentNameField.getText();
-        departmentDTO dto = new departmentDTO();
-        dto.setDepartmentCode(departmentCode);
-        dto.setDepartmentName(departmentName);
+    private void initComponents() {
+        JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
+        JLabel departmentCodeLabel = new JLabel("부서 코드");
+        departmenCodeComboBox = new JComboBox<>(deptCode);
+        JLabel departmentNameLabel = new JLabel("부서 이름");
+        departmentNameComboBox = new JComboBox<>(deptName);
+        insertButton = new JButton("부서 추가");
+        deleteButton = new JButton("부서 삭제");
+        selectAllButton = new JButton("모든 부서 조회");
 
-        deptDAO.insert(dto);
-        resultArea.setText("부서 추가 완료: " + departmentCode + " - " + departmentName);
-    }
+        String[] columnNames = {"부서 코드", "부서 이름"};
+        tableModel = new DefaultTableModel(columnNames, 0);
+        resultTable = new JTable(tableModel);
+        resultTable.setFillsViewportHeight(true);
 
-    // 부서 수정
-    private void updateDepartment() {
-        String departmentCode = departmentCodeField.getText();
-        String departmentName = departmentNameField.getText();
+        panel.add(departmentCodeLabel);
+        panel.add(departmenCodeComboBox);
+        panel.add(departmentNameLabel);
+        panel.add(departmentNameComboBox);
+        panel.add(insertButton);
+        panel.add(deleteButton);
+        panel.add(selectAllButton);
 
-        deptDAO.update(departmentCode, departmentName);
-        resultArea.setText("부서 수정 완료: " + departmentCode + " - " + departmentName);
-    }
-
-    // 부서 삭제
-    private void deleteDepartment() {
-        String departmentCode = departmentCodeField.getText();
-
-        deptDAO.delete(departmentCode);
-        resultArea.setText("부서 삭제 완료: " + departmentCode);
-    }
-
-    // 모든 부서 조회
-    private void selectAllDepartments() {
-        ArrayList<departmentDTO> departments = deptDAO.selectAll();
-        StringBuilder sb = new StringBuilder();
-        for (departmentDTO dept : departments) {
-            sb.append("부서 코드: ").append(dept.getDepartmentCode()).append(", 부서 이름: ").append(dept.getDepartmentName()).append("\n");
-        }
-        resultArea.setText(sb.toString());
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(panel, BorderLayout.NORTH);
+        getContentPane().add(new JScrollPane(resultTable), BorderLayout.CENTER); // JTable을 JScrollPane에 추가
     }
 }

@@ -2,7 +2,7 @@ package dao;
 
 import dto.employeeDTO;
 import dto.employeeSpecInfoDTO;
-
+import dao.departmentDAO;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class employeeDAO extends superDAO {
     private static employeeDAO employeedao = null;
+    private static departmentDAO departmentdao = new departmentDAO();
 
     public employeeDAO() {
         super();
@@ -222,4 +223,16 @@ public class employeeDAO extends superDAO {
         return elist;
     }
 
+
+    public String generateEmployeeCode(String deptCode, int hireYear) {
+        // 입사 연도에서 마지막 두 자리 추출
+        String yearTwoCut = String.format("%02d", hireYear % 100);
+
+        // 부서에 맞는 시퀀스 조회
+        int seqNum = departmentdao.findDepartmentSequence(deptCode);
+        String seqNumFormat = String.format("%03d", seqNum);// 시퀀스를 3자리로 포맷
+
+        // 직원 코드 생성 (부서 코드 + 입사 연도 뒷 두 자리 + 시퀀스 번호)
+        return deptCode + yearTwoCut + seqNumFormat;
+    }
 }

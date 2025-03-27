@@ -95,15 +95,7 @@ public class departmentAdmin {
         System.out.println("직원의 근무 상태를 입력하세요");
         String employeeStatus = Scan.nextLine();  // 근무 상태 입력
 
-        // 입사 연도에서 마지막 두 자리만 추출
-        String yearTwoCut = String.format("%02d", hireYear % 100);
-
-        // 부서에 맞는 시퀀스를 찾아 직원 코드 생성
-        int seqNum = departdao.findDepartmentSequence(employeeDeptCode);
-        String seqNumFormat = String.format("%03d", seqNum);  // 시퀀스를 3자리로 포맷
-
-        // 직원 코드 생성 (부서 코드 + 입사 연도 뒷 두 자리 + 시퀀스 번호)
-        String employeeCode = employeeDeptCode + yearTwoCut + seqNumFormat;
+        String employeeCode = employeedao.generateEmployeeCode(employeeDeptCode, hireYear);
 
         // 직원 DTO에 정보 설정
         employeeDTO edto = new employeeDTO();
