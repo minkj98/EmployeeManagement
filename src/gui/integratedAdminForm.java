@@ -2,6 +2,7 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import dao.departmentDAO;
 import dto.departmentDTO;
@@ -16,7 +17,6 @@ public class integratedAdminForm extends JFrame {
     private JTable resultTable; // JTextArea 대신 JTable 사용
     private DefaultTableModel tableModel; // 테이블 데이터 모델
     private JButton insertButton;
-    private JButton updateButton;
     private JButton deleteButton;
     private JButton selectAllButton;
     private final departmentDAO deptDAO;
@@ -35,6 +35,7 @@ public class integratedAdminForm extends JFrame {
     }
 
     private void addListener() {
+        //update는 존재 필요가 없다.
         insertButton.addActionListener(e -> insertDepartment());
         deleteButton.addActionListener(e -> deleteDepartment());
         selectAllButton.addActionListener(e -> selectAllDepartments());
@@ -45,7 +46,6 @@ public class integratedAdminForm extends JFrame {
             int codeIndex = departmenCodeComboBox.getSelectedIndex();
             int nameIndex = departmentNameComboBox.getSelectedIndex();
 
-            // 부서 코드와 일치하지 않는 부서 이름 선택시
             if (codeIndex != nameIndex) {
                 JOptionPane.showMessageDialog(this, "잘못된 선택입니다. 부서 코드와 이름이 일치해야 합니다.", "선택 오류", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -54,29 +54,45 @@ public class integratedAdminForm extends JFrame {
             String departmentCode = deptCode[codeIndex];
             String departmentName = deptName[nameIndex];
 
+            // 부서 코드 중복 확인
+            if (deptDAO.duplicateDepartmentCode(departmentCode)) {
+                JOptionPane.showMessageDialog(this, "이미 존재하는 부서 코드입니다: " + departmentCode, "중복 오류", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             departmentDTO dto = new departmentDTO();
             dto.setDepartmentCode(departmentCode);
             dto.setDepartmentName(departmentName);
             deptDAO.insert(dto);
-            
+
             JOptionPane.showMessageDialog(this, "부서 추가 완료: " + departmentCode + " - " + departmentName);
-            selectAllDepartments(); // 추가 후 테이블 갱신
+            selectAllDepartments();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "데이터베이스 오류로 부서 추가 실패: " + e.getMessage(), "데이터베이스 오류", JOptionPane.ERROR_MESSAGE);
+            System.out.println("데이터베이스 오류: " + e.getMessage());
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "부서 추가 실패: " + e.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
+            System.out.println("부서 추가 중 오류 발생: " + e.getMessage());
         }
     }
 
     private void deleteDepartment() {
         try {
-            //departmentCode에서 선택된 항목을 가져옴
-            String departmentCode = (String) departmenCodeComboBox.getSelectedItem();
-            deptDAO.delete(departmentCode);
-            JOptionPane.showMessageDialog(this, "부서 삭제 완료: " + departmentCode);
-            selectAllDepartments(); // 삭제 후 테이블 갱신
+            int selectRow = resultTable.getSelectedRow();
+            if (selectRow != -1) {
+                String departmentCode = (String) tableModel.getValueAt(selectRow, 0);
+                deptDAO.delete(departmentCode); // 데이터베이스에서 부서 삭제
+                JOptionPane.showMessageDialog(this, "부서 삭제 완료: " + departmentCode);
+                selectAllDepartments(); // 테이블 갱신
+            } else {
+                JOptionPane.showMessageDialog(this, "삭제할 부서의 행을 선택하세요");
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "부서 삭제 실패: " + e.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
+            System.out.println("부서 삭제 중 오류 발생: " + e.getMessage());
         }
     }
+
 
     private void selectAllDepartments() {
         try {

@@ -1,13 +1,10 @@
 package gui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
+import buttonCustom.roundButton;
+import buttonCustom.roundBoder;
 import dao.integratedAdminAccountDAO;
 import dao.departmentAdminAccountDAO;
 import dto.departmentAdminAccountDTO;
@@ -18,14 +15,14 @@ import main.integratedAccount;
 public class signUpForm extends JDialog {
     private integratedAdminAccountDAO iadao;
     private departmentAdminAccountDAO dadao;
-    private departmentAccount dAccount;
-    private integratedAccount iAccount;
-    private JRadioButton integratedAdminButton;
-    private JRadioButton departmentAdminButton;
-    private RoundButton submitButton;
-    private RoundButton cancelButton;
-    private RoundButton showPasswordButton;
-    private RoundButton checkIdButton;
+    private departmentAccount dAccount = null;
+    private integratedAccount iAccount = null;
+    private JToggleButton integratedAdminButton;
+    private JToggleButton departmentAdminButton;
+    private roundButton submitButton;
+    private roundButton cancelButton;
+    private roundButton showPasswordButton;
+    private roundButton checkIdButton;
     private ButtonGroup group;
     private JLabel idLabel;
     private JLabel idCheckResultLabel;
@@ -42,13 +39,11 @@ public class signUpForm extends JDialog {
         this.iadao = iadao;
         this.dadao = dadao;
         try {
-            System.out.println("signUpForm 생성자 시작");
             initializeAccountsAsync();
             initComponents();
             addListeners();
             setDisplay();
             showFrame();
-            System.out.println("signUpForm 생성자 완료");
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "다이얼로그 생성 중 오류 발생: " + ex.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
@@ -87,6 +82,7 @@ public class signUpForm extends JDialog {
 
         labelTitle = new JLabel("회원가입 정보란");
 
+
         idLabel = new JLabel("아이디");
         idLabel.setPreferredSize(labelSize);
         idLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -113,15 +109,15 @@ public class signUpForm extends JDialog {
         confirmPasswordField.setEchoChar('*');
         confirmPasswordField.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        submitButton = new RoundButton("확인");
+        submitButton = new roundButton("확인");
         submitButton.setPreferredSize(buttonSize);
         submitButton.setFont(new Font("SansSerif", Font.BOLD, 14));
 
-        cancelButton = new RoundButton("취소");
+        cancelButton = new roundButton("취소");
         cancelButton.setPreferredSize(buttonSize);
         cancelButton.setFont(new Font("SansSerif", Font.BOLD, 14));
 
-        checkIdButton = new RoundButton("중복 확인");
+        checkIdButton = new roundButton("중복 확인");
         checkIdButton.setPreferredSize(buttonSize);
         checkIdButton.setFont(new Font("SansSerif", Font.BOLD, 14));
 
@@ -129,26 +125,37 @@ public class signUpForm extends JDialog {
         idCheckResultLabel = new JLabel("");
         idCheckResultLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
-        integratedAdminButton = new JRadioButton("통합 관리자");
-        integratedAdminButton.setContentAreaFilled(false);
-        integratedAdminButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        integratedAdminButton = new JToggleButton("통합 관리자");
+        integratedAdminButton.setContentAreaFilled(true);  // 배경색을 채우도록 설정
+        integratedAdminButton.setBackground(new Color(230, 240, 250));  // 연한 파란색 배경
+        integratedAdminButton.setForeground(new Color(0, 51, 102));  // 진한 파란색 텍스트
+        integratedAdminButton.setFont(new Font("SansSerif", Font.BOLD, 12));
+        integratedAdminButton.setPreferredSize(buttonSize);
+        integratedAdminButton.setBorderPainted(true);  // 테두리 표시
+        integratedAdminButton.setFocusPainted(true);   // 포커스 시 강조 표시
+        integratedAdminButton.setBorder(new roundBoder(15));
 
-        departmentAdminButton = new JRadioButton("부서 관리자");
-        departmentAdminButton.setContentAreaFilled(false);
-        departmentAdminButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        departmentAdminButton = new JToggleButton("부서 관리자");
+        departmentAdminButton.setContentAreaFilled(true);
+        departmentAdminButton.setBackground(new Color(230, 240, 250));
+        departmentAdminButton.setForeground(new Color(0, 51, 102));
+        departmentAdminButton.setFont(new Font("SansSerif", Font.BOLD, 12));
+        departmentAdminButton.setPreferredSize(buttonSize);
+        departmentAdminButton.setBorderPainted(true);
+        departmentAdminButton.setFocusPainted(false);
+        departmentAdminButton.setBorder(new roundBoder(15));
+
 
         group = new ButtonGroup();
         group.add(integratedAdminButton);
         group.add(departmentAdminButton);
 
-        showPasswordButton = new RoundButton("표시");
+        showPasswordButton = new roundButton("표시");
         showPasswordButton.setPreferredSize(buttonSize);
         showPasswordButton.setFont(new Font("SansSerif", Font.BOLD, 14));
-        System.out.println("initComponents 완료");
     }
 
     private void addListeners() {
-        System.out.println("addListeners 시작");
         showPasswordButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -336,11 +343,25 @@ public class signUpForm extends JDialog {
                 }
             }
         });
-        System.out.println("addListeners 완료");
+
+        integratedAdminButton.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                integratedAdminButton.setBackground(new Color(200, 220, 255));  // 선택 시 색상
+            } else {
+                integratedAdminButton.setBackground(new Color(230, 240, 250));  // 미선택 시 색상
+            }
+        });
+
+        departmentAdminButton.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                departmentAdminButton.setBackground(new Color(200, 220, 255));  // 선택 시 색상
+            } else {
+                departmentAdminButton.setBackground(new Color(230, 240, 250));  // 미선택 시 색상
+            }
+        });
     }
 
     private void setDisplay() {
-        System.out.println("setDisplay 시작");
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -357,7 +378,6 @@ public class signUpForm extends JDialog {
         idPanel.add(idField);
         idPanel.add(checkIdButton);
 
-        // 중복 확인 결과 라벨을 위한 패널 추가
         JPanel idCheckResultPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         idCheckResultPanel.add(idCheckResultLabel);
 
@@ -370,36 +390,32 @@ public class signUpForm extends JDialog {
         confirmPasswordPanel.add(confirmPassword);
         confirmPasswordPanel.add(confirmPasswordField);
 
-        JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        radioPanel.add(integratedAdminButton);
-        radioPanel.add(departmentAdminButton);
+        JPanel togglePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
+        togglePanel.add(integratedAdminButton);
+        togglePanel.add(departmentAdminButton);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.add(submitButton);
         buttonPanel.add(cancelButton);
 
         formPanel.add(idPanel);
-        formPanel.add(idCheckResultPanel); // 중복 확인 결과 라벨 추가
+        formPanel.add(idCheckResultPanel);
         formPanel.add(passwordPanel);
         formPanel.add(confirmPasswordPanel);
-        formPanel.add(radioPanel);
+        formPanel.add(togglePanel);
         formPanel.add(buttonPanel);
 
         mainPanel.add(titlePanel, BorderLayout.NORTH);
         mainPanel.add(formPanel, BorderLayout.CENTER);
-
         add(mainPanel);
-        System.out.println("setDisplay 완료");
     }
 
     private void showFrame() {
-        System.out.println("showFrame 시작");
         setTitle("Sign Up");
         pack();
         setResizable(false);
         setLocationRelativeTo(null);
         setVisible(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        System.out.println("showFrame 완료");
     }
 }

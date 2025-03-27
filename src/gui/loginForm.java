@@ -7,10 +7,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-
+import buttonCustom.roundButton;
 import dao.integratedAdminAccountDAO;
 import dao.departmentAdminAccountDAO;
-import gui.RoundButton;
 
 public class loginForm extends JFrame {
     private final departmentAdminAccountDAO dadao;
@@ -19,9 +18,9 @@ public class loginForm extends JFrame {
     private JRadioButton departmentAdminButton;
     private JTextField idField;
     private JPasswordField passwordField;
-    private RoundButton loginButton;
-    private RoundButton signUpButton;
-    private RoundButton showPasswordButton;
+    private roundButton loginButton;
+    private roundButton signUpButton;
+    private roundButton showPasswordButton;
     private ButtonGroup group;
     private JLabel labelId;
     private JLabel labelPassword;
@@ -127,9 +126,7 @@ public class loginForm extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 SwingUtilities.invokeLater(() -> {
                     try {
-                        System.out.println("signUpForm 생성 시작");
                         new signUpForm(loginForm.this, iadao, dadao);
-                        System.out.println("signUpForm 생성 완료");
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(loginForm.this, "회원가입 창 생성 실패: " + ex.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
@@ -137,8 +134,6 @@ public class loginForm extends JFrame {
                 });
             }
         });
-
-
     }
 
     private void initComponents() {
@@ -169,12 +164,12 @@ public class loginForm extends JFrame {
         passwordField.setEchoChar('*'); // 비밀번호 입력 시 '*'로 표시
 
         // 로그인 버튼 생성 및 크기 설정
-        loginButton = new RoundButton("로그인");
+        loginButton = new roundButton("로그인");
         loginButton.setPreferredSize(buttonSize);
         loginButton.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         // 회원가입 버튼 생성 및 크기 설정
-        signUpButton = new RoundButton("회원가입");
+        signUpButton = new roundButton("회원가입");
         signUpButton.setPreferredSize(buttonSize);
         signUpButton.setFont(new Font("SansSerif", Font.BOLD, 12));
 
@@ -194,7 +189,7 @@ public class loginForm extends JFrame {
         group.add(departmentAdminButton);
 
         // 비밀번호 표시 버튼 생성 및 크기 설정
-        showPasswordButton = new RoundButton("표시");
+        showPasswordButton = new roundButton("표시");
         showPasswordButton.setPreferredSize(new Dimension(60, 25));
         showPasswordButton.setFont(new Font("SansSerif", Font.BOLD, 12));
     }
@@ -290,8 +285,6 @@ public class loginForm extends JFrame {
         backgroundPanel.add(pnlCenter, BorderLayout.CENTER); // 관리자 선택 패널 (가운데)
         backgroundPanel.add(pnlSouth, BorderLayout.SOUTH); // 로그인 및 회원가입 버튼 패널 (하단)
     }
-
-
 
     private void showFrame() {
         setTitle("Login");
